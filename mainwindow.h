@@ -15,6 +15,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    basler * camera ;
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 

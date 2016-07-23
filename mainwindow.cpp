@@ -6,6 +6,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    camera = new basler();
+    camera->connect();
 }
 
 MainWindow::~MainWindow()
@@ -15,11 +17,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {
-    basler * camera = new basler();
+
     camera->start();
-    uchar mydata[800*600] ;
-    memcpy(mydata, (uchar*)camera->globalImageBuffer, 800*600);
-    QImage *myimage = new QImage(mydata, 800, 600, QImage::Format_Indexed8);
+//    uchar mydata[800*600] ;
+//    memcpy(mydata, (uchar*)camera->pImageBuffer, 800*600);
+    QImage *myimage = new QImage((uchar*)camera->globalImageBuffer, 800, 600, QImage::Format_Indexed8);
 
     QGraphicsScene *scene = new QGraphicsScene();
     scene->addPixmap(QPixmap::fromImage(*myimage));

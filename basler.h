@@ -20,6 +20,10 @@ public:
     basler();
     int start();
     uint8_t globalImageBuffer[800*600];
+    CInstantCamera *camera;
+    int disconnect();
+    //uint8_t *pImageBuffer ;
+    void connect();
     // Number of images to be grabbed.
     static const uint32_t c_countOfImagesToGrab = 1;
 
