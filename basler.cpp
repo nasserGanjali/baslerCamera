@@ -75,18 +75,18 @@ int basler::start()
                 //for(int i = 0; i < 800*600; i++)
                 //cout << "Gray value of first pixel: " << (uint32_t) pImageBuffer[i] << endl;
                 //                cout << "image size : " << sizeof(pImageBuffer) << endl << endl;
-                /*ofstream myfile("/tmp/image.raw");
+                ofstream myfile("/tmp/image.raw");
         if(myfile.is_open())
-        {*/
-                //for(int i = 0; i < 800*600; i++)
+        {
+                for(int i = 0; i < 800*600; i++)
 
-                //myfile<<pImageBuffer[i];
+                myfile<<pImageBuffer[i];
                 //myfile<<256;
-                /* myfile.close();
+                 myfile.close();
         }else
         {
             cout<<"cannot open file"<<endl;
-        }*/
+        }
 #ifdef PYLON_WIN_BUILD
                 // Display the grabbed image.
                 Pylon::DisplayImage(1, ptrGrabResult);

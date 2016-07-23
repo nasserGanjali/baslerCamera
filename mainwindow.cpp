@@ -20,11 +20,17 @@ void MainWindow::on_pushButton_clicked()
 
     camera->start();
 //    uchar mydata[800*600] ;
-//    memcpy(mydata, (uchar*)camera->pImageBuffer, 800*600);
+    memcpy(buffer, (uchar*)camera->globalImageBuffer, 800*600);
     QImage *myimage = new QImage((uchar*)camera->globalImageBuffer, 800, 600, QImage::Format_Indexed8);
 
     QGraphicsScene *scene = new QGraphicsScene();
     scene->addPixmap(QPixmap::fromImage(*myimage));
     ui->graphicsView->setScene(scene);
     ui->graphicsView->show();
+}
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    myCanny *canny = new myCanny();
+    canny->start(buffer);
 }

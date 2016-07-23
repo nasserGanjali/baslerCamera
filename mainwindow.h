@@ -5,6 +5,7 @@
 #include "basler.h"
 #include <QImage>
 #include <QGraphicsScene>
+#include <mycanny.h>
 
 namespace Ui {
 class MainWindow;
@@ -16,11 +17,14 @@ class MainWindow : public QMainWindow
 
 public:
     basler * camera ;
+    uchar buffer[800*600];
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
 private slots:
     void on_pushButton_clicked();
+
+    void on_pushButton_2_clicked();
 
 private:
     Ui::MainWindow *ui;
