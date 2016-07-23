@@ -19,6 +19,7 @@ class basler
 public:
     basler();
     int start();
+    void loadConfig();
     uint8_t globalImageBuffer[800*600];
     CInstantCamera *camera;
     int disconnect();

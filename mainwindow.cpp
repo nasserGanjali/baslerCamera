@@ -34,3 +34,9 @@ void MainWindow::on_pushButton_2_clicked()
     myCanny *canny = new myCanny();
     canny->start(buffer);
 }
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    basler camera;
+    camera.loadConfig();
+}

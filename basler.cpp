@@ -75,7 +75,7 @@ int basler::start()
                 //for(int i = 0; i < 800*600; i++)
                 //cout << "Gray value of first pixel: " << (uint32_t) pImageBuffer[i] << endl;
                 //                cout << "image size : " << sizeof(pImageBuffer) << endl << endl;
-                ofstream myfile("/tmp/image.raw");
+                /*   ofstream myfile("/tmp/image.raw");
         if(myfile.is_open())
         {
                 for(int i = 0; i < 800*600; i++)
@@ -86,7 +86,7 @@ int basler::start()
         }else
         {
             cout<<"cannot open file"<<endl;
-        }
+        }*/
 #ifdef PYLON_WIN_BUILD
                 // Display the grabbed image.
                 Pylon::DisplayImage(1, ptrGrabResult);
@@ -109,3 +109,59 @@ int basler::start()
 
     return exitCode;
 }
+
+void basler::loadConfig()
+{
+    const char Filename[] = "NodeMap.pfs";
+    // The exit code of the sample application.
+    int exitCode = 0;
+
+    // Before using any pylon methods, the pylon runtime must be initialized.
+    PylonInitialize();
+
+    try
+    {
+        // Create an instant camera object with the camera device found first.
+        CInstantCamera camera( CTlFactory::GetInstance().CreateFirstDevice());
+
+        // Print the model name of the camera.
+        cout << "Using device " << camera.GetDeviceInfo().GetModelName() << endl;
+
+        // Open the camera.
+        camera.Open();
+
+        cout << "Saving camera's node map to file..."<< endl;
+        // Save the content of the camera's node map into the file.
+        //        CFeaturePersistence::Save( Filename, &camera.GetNodeMap() );
+        // --------------------------------------------------------------------
+
+        // Just for demonstration, read the content of the file back to the camera's node map with enabled validation.
+        cout << "Reading file back to camera's node map..."<< endl;
+        CFeaturePersistence::Load( Filename, &camera.GetNodeMap(), true );
+
+        // Close the camera.
+        camera.Close();
+    }
+    catch (const GenericException &e)
+    {
+        // Error handling.
+        cerr << "An exception occurred." << endl
+             << e.GetDescription() << endl;
+        exitCode = 1;
+    }
+
+    // Comment the following two lines to disable waiting on exit
+
+    // Releases all pylon resources.
+    PylonTerminate();
+
+    return ;
+}
+
+
+
+
+
+
+
+
