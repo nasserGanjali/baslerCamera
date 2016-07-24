@@ -9,6 +9,11 @@
 
 // Namespace for using pylon objects.
 using namespace Pylon;
+#include <pylon/gige/BaslerGigECamera.h>
+typedef Pylon::CBaslerGigECamera Camera_t;
+using namespace Basler_GigECameraParams;
+using namespace Basler_GigEStreamParams;
+using namespace Basler_GigETLParams;
 
 // Namespace for using cout.
 using namespace std;
@@ -19,6 +24,7 @@ class basler
 public:
     basler();
     int start();
+    int startTriggerMode();
     void loadConfig();
     uint8_t globalImageBuffer[800*600];
     CInstantCamera *camera;

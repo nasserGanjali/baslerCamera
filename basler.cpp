@@ -47,7 +47,7 @@ int basler::start()
     int exitCode = 0;
     try{
 
-
+        //camera->RegisterConfiguration(new C);
         // Start the grabbing of c_countOfImagesToGrab images.
         // The camera device is parameterized with a default configuration which
         // sets up free-running continuous acquisition.
@@ -61,7 +61,7 @@ int basler::start()
         while ( camera->IsGrabbing())
         {
             // Wait for an image and then retrieve it. A timeout of 5000 ms is used.
-            camera->RetrieveResult( 500, ptrGrabResult, TimeoutHandling_ThrowException);
+            camera->RetrieveResult( 50000, ptrGrabResult, TimeoutHandling_ThrowException);
 
             // Image grabbed successfully?
             if (ptrGrabResult->GrabSucceeded())
@@ -108,6 +108,167 @@ int basler::start()
 
 
     return exitCode;
+}
+
+
+int basler::startTriggerMode()
+{
+    // Automagically call PylonInitialize and PylonTerminate to ensure that the pylon runtime
+    // system is initialized during the lifetime of this object.
+
+    try
+    {
+        // Get the transport layer factory.
+        CTlFactory& TlFactory = CTlFactory::GetInstance();
+
+        // Create the transport layer object needed to enumerate or
+        // create a camera object of type Camera_t::DeviceClass().
+        ITransportLayer *pTl = TlFactory.CreateTl(Camera_t::DeviceClass());
+
+        // Exit the application if the specific transport layer is not available.
+        if (! pTl)
+        {
+            cerr << "Failed to create transport layer!" << endl;
+            //pressEnterToExit();
+            return 1;
+        }
+
+        // Get all attached cameras and exit the application if no camera is found.
+        DeviceInfoList_t devices;
+        if (0 == pTl->EnumerateDevices(devices))
+        {
+            cerr << "No camera present!" << endl;
+            //pressEnterToExit();
+            return 1;
+        }
+
+        // Create the camera object of the first available camera.
+        // The camera object is used to set and get all available
+        // camera features.
+        Camera_t Camera(pTl->CreateDevice(devices[0]));
+
+        // Open the camera.
+        Camera.Open();
+
+        // Get the first stream grabber object of the selected camera.
+        Camera_t::StreamGrabber_t StreamGrabber(Camera.GetStreamGrabber(0));
+
+        // Open the stream grabber.
+        StreamGrabber.Open();
+
+        CFeaturePersistence::Load( "NodeMap.pfs", Camera.GetNodeMap(), true );
+
+        Camera.AcquisitionMode.SetValue(AcquisitionMode_SingleFrame);
+        Camera.TriggerSelector.SetValue( TriggerSelector_AcquisitionStart);
+        Camera.TriggerMode.SetValue( TriggerMode_On);
+        Camera.TriggerSource.SetValue(TriggerSource_Line1);
+        //	Camera.TriggerActivasion.SetValue(TriggerActivation_RisingEdge);
+        Camera.AcquisitionFrameCount.SetValue(1);
+
+        // Create an image buffer.
+        const size_t ImageSize = (size_t)(Camera.PayloadSize.GetValue());
+        uint8_t * const pBuffer = new uint8_t[ ImageSize ];
+
+        // We won't use image buffers greater than ImageSize.
+        StreamGrabber.MaxBufferSize.SetValue(ImageSize);
+
+        // We won't queue more than one image buffer at a time.
+        StreamGrabber.MaxNumBuffer.SetValue(1);
+
+        // Allocate all resources for grabbing. Critical parameters like image
+        // size now must not be changed until FinishGrab() is called.
+        StreamGrabber.PrepareGrab();
+
+        // Buffers used for grabbing must be registered at the stream grabber.
+        // The registration returns a handle to be used for queuing the buffer.
+        const StreamBufferHandle hBuffer =
+                StreamGrabber.RegisterBuffer(pBuffer, ImageSize);
+
+        // Put the buffer into the grab queue for grabbing.
+        StreamGrabber.QueueBuffer(hBuffer, NULL);
+
+        // Let the camera acquire one single image ( Acquisition mode equals
+        // SingleFrame! ).
+        Camera.AcquisitionStart.Execute();
+
+        // Wait for the grabbed image with a timeout of 3 seconds.
+
+        if (StreamGrabber.GetWaitObject().Wait(10000))
+        {
+            // Get the grab result from the grabber's result queue.
+            GrabResult Result;
+            StreamGrabber.RetrieveResult(Result);
+
+            if (Result.Succeeded())
+            {
+                // Grabbing was successful, process image.
+               // cout << "Image #" << n << " acquired!" << endl;
+                cout << "Size: " << Result.GetSizeX() << " x " << Result.GetSizeY() << endl;
+
+                memcpy(globalImageBuffer,(uint8_t *) Result.Buffer(),800*600);
+                // Get the pointer to the image buffer.
+                //const uint8_t *pImageBuffer = (uint8_t *) Result.Buffer();
+                //cout << "Gray value of first pixel: " << (uint32_t) pImageBuffer[0]
+                //     << endl << endl;
+
+                // Reuse the buffer for grabbing the next image.
+                //StreamGrabber.QueueBuffer(Result.Handle(), NULL);
+            }
+            else
+            {
+                // Error handling
+                cerr << "No image acquired!" << endl;
+                cerr << "Error code : 0x" << hex
+                     << Result.GetErrorCode() << endl;
+                cerr << "Error description : "
+                     << Result.GetErrorDescription() << endl;
+
+            }
+        }
+        else
+        {
+            // Timeout
+            cerr << "Timeout occurred!" << endl;
+
+            // Get the pending buffer back (You are not allowed to deregister
+            // buffers when they are still queued).
+            StreamGrabber.CancelGrab();
+
+            // Get all buffers back.
+            for (GrabResult r; StreamGrabber.RetrieveResult(r););
+
+        }
+
+
+        // Clean up
+
+        // You must deregister the buffers before freeing the memory.
+        StreamGrabber.DeregisterBuffer(hBuffer);
+
+        // Free all resources used for grabbing.
+        StreamGrabber.FinishGrab();
+
+        // Close stream grabber.
+        StreamGrabber.Close();
+
+        // Close camera.
+        Camera.Close();
+
+
+        // Free memory of image buffer.
+        delete[] pBuffer;
+    }
+    catch (const GenericException &e)
+    {
+        // Error handling
+        cerr << "An exception occurred!" << endl
+             << e.GetDescription() << endl;
+
+        return 1;
+    }
+
+    // Quit the application.
+    return 0;
 }
 
 void basler::loadConfig()

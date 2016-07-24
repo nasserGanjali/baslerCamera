@@ -18,7 +18,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_clicked()
 {
 
-    camera->start();
+    camera->startTriggerMode();
 //    uchar mydata[800*600] ;
     memcpy(buffer, (uchar*)camera->globalImageBuffer, 800*600);
     QImage *myimage = new QImage((uchar*)camera->globalImageBuffer, 800, 600, QImage::Format_Indexed8);
@@ -37,6 +37,18 @@ void MainWindow::on_pushButton_2_clicked()
 
 void MainWindow::on_pushButton_3_clicked()
 {
-    basler camera;
-    camera.loadConfig();
+    camera->loadConfig();
+}
+
+void MainWindow::on_pushButton_4_clicked()
+{
+    camera->start();
+//    uchar mydata[800*600] ;
+    memcpy(buffer, (uchar*)camera->globalImageBuffer, 800*600);
+    QImage *myimage = new QImage((uchar*)camera->globalImageBuffer, 800, 600, QImage::Format_Indexed8);
+
+    QGraphicsScene *scene = new QGraphicsScene();
+    scene->addPixmap(QPixmap::fromImage(*myimage));
+    ui->graphicsView->setScene(scene);
+    ui->graphicsView->show();
 }

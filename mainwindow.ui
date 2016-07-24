@@ -17,14 +17,14 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>230</x>
+      <x>110</x>
       <y>10</y>
-      <width>80</width>
+      <width>91</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>PushButton</string>
+     <string>trigger mod</string>
     </property>
    </widget>
    <widget class="QGraphicsView" name="graphicsView">
@@ -61,6 +61,19 @@
     </property>
     <property name="text">
      <string>config camera</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_4">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>10</y>
+      <width>91</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>normal mod</string>
     </property>
    </widget>
   </widget>
